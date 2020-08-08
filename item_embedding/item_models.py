@@ -8,8 +8,10 @@ from keras.models import Model
 from sklearn.metrics import roc_auc_score
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
+from keras.models import model_from_json
 import pickle
 import pymysql
+import json
 
 
 def load_tag_prediction_model(EMBEDDING_DIM, MAX_SEQUENCE_LENGTH,num_words,K):
@@ -95,13 +97,26 @@ def load_encoder_model(EMBEDDING_DIM, MAX_SEQUENCE_LENGTH,num_words,K):
     encoder.load_weights('item_embedding/resources/item_encoding.h5')
     return encoder
 
+# def item_encode(df):
+#     model_config = pickle.load(open('item_embedding/resources/model_config.pkl','rb'))
+#     encoder = load_encoder_model(**model_config)
+#     tokenizer = pickle.load(open('item_embedding/resources/tokenizer.pkl','rb'))
+
+#     df = preprocess_texts(df,**model_config)
+#     sequences = tokenizer.texts_to_sequences(df.texts)
+#     padded_sequences = pad_sequences(sequences,maxlen = model_config['MAX_SEQUENCE_LENGTH'])
+
+#     return encoder.predict(padded_sequences)
+
+
 def item_encode(df):
     model_config = pickle.load(open('item_embedding/resources/model_config.pkl','rb'))
-    encoder = load_encoder_model(**model_config)
+    encoder = model_from_json(json.loads(open('item_embedding/resources/item_encoding.json').read()))
+    encoder.load_weights('item_embedding/resources/item_encoding.h5')
     tokenizer = pickle.load(open('item_embedding/resources/tokenizer.pkl','rb'))
 
     df = preprocess_texts(df,**model_config)
     sequences = tokenizer.texts_to_sequences(df.texts)
     padded_sequences = pad_sequences(sequences,maxlen = model_config['MAX_SEQUENCE_LENGTH'])
 
-    return encoder.predict(padded_sequences)
+    return encoder.predict(padded_sequences),df
