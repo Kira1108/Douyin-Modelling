@@ -1,9 +1,5 @@
-from etl import load_user_info_features
-from etl import load_fans_info_features
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-from IPython.core.pylabtools import figsize
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import FunctionTransformer
 from sklearn.pipeline import Pipeline, FeatureUnion
@@ -50,13 +46,18 @@ def make_user_fans_pipeline(n_regions = 30):
 
     # compress region features
     def region_feature_compressor(df,n = n_regions):
+        # select column names that contain region data
         region_cols = [col for col in df.columns if col.startswith('region')]
+        
+        # ignore small regoins as 'others'
         top_regions = df[region_cols].sum().\
             sort_values(ascending = False).iloc[1:n].index.tolist()
         region_df = df[top_regions].copy()
         region_df['region_others'] = 0
         region_df.loc[(region_df.sum(axis = 1) == 0).values,'region_others'] = 1
         return region_df
+    
+    # make it a transformer
     region_compressor = FunctionTransformer(region_feature_compressor)
 
     # categorical features
