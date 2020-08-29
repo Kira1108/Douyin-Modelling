@@ -47,6 +47,7 @@ def load_tag_prediction_model(EMBEDDING_DIM, MAX_SEQUENCE_LENGTH,num_words,K):
     model.load_weights('item_embedding/resources/item_embedding_model.h5')
     return model
 
+
 def preprocess_texts(df,**kwargs):
     df['clean_name'] = df.name.apply(remove_blanks).apply(replace_puncs).apply(find_chinese).values
     df['cutted_text'] = df.clean_name.apply(cut_text).values
